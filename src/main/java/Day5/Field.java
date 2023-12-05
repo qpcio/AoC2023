@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 public class Field {
     List<Seed> seeds = new ArrayList<>();
+    List<SeedGroup> seedGroups = new ArrayList<>();
 
     List<Mapping> seed2soil = new ArrayList<>();
     List<Mapping> soil2fert = new ArrayList<>();
@@ -24,87 +25,109 @@ public class Field {
         return result;
     }
 
-    public void processEverything() {
-        for (Seed s : seeds) {
-            boolean changed = false;
-            for (Mapping m : seed2soil) {
-                if (m.contains(s.id)) {
-                    s.soil = m.outputFor(s.id);
-                    changed = true;
-                    break;
-                }
-            }
-            if(!changed){
-                s.soil = s.id;
-            }
-            changed = false;
-            for (Mapping m : soil2fert) {
-                if (m.contains(s.soil)) {
-                    s.fertilizer = m.outputFor(s.soil);
-                    changed = true;
-                    break;
-                }
-            }
-            if(!changed){
-                s.fertilizer = s.soil;
-            }
-            changed = false;
-            for (Mapping m : fert2water) {
-                if (m.contains(s.fertilizer)) {
-                    s.water = m.outputFor(s.fertilizer);
-                    changed = true;
-                    break;
-                }
-            }
-            if(!changed){
-                s.water = s.fertilizer;
-            }
-            changed = false;
-            for (Mapping m : water2light) {
-                if (m.contains(s.water)) {
-                    s.light = m.outputFor(s.water);
-                    changed = true;
-                    break;
-                }
-            }
-            if(!changed){
-                s.light = s.water;
-            }
-            changed = false;
-            for (Mapping m : light2temp) {
-                if (m.contains(s.light)) {
-                    s.temperature = m.outputFor(s.light);
-                    changed = true;
-                    break;
-                }
-            }
-            if(!changed){
-                s.temperature = s.light;
-            }
-            changed = false;
-            for (Mapping m : temp2hum) {
-                if (m.contains(s.temperature)) {
-                    s.humidity = m.outputFor(s.temperature);
-                    changed = true;
-                    break;
-                }
-            }
-            if(!changed){
-                s.humidity = s.temperature;
-            }
-            changed = false;
-            for (Mapping m : hum2location) {
-                if (m.contains(s.humidity)) {
-                    s.location = m.outputFor(s.humidity);
-                    changed = true;
-                    break;
-                }
-            }
-            if(!changed){
-                s.location = s.humidity;
+    public long task2(){
+        Seed seed = new Seed(seedGroups.get(0).startId);
+        processSeed(seed);
+        long result = seed.location;
+        for(SeedGroup sg:seedGroups){
+            int index = seedGroups.indexOf(sg)+1;
+            System.out.println("Starting group "+index+" of "+seedGroups.size());
+            for(long i=0;i<sg.length;i++){
+                
+                 seed=new Seed(sg.startId+i);
+                 processSeed(seed);
+                 if(seed.location<result)result = seed.location;
             }
         }
+        return result;
+    }
 
+
+    public void processEverything() {
+        for (Seed s : seeds) {
+            processSeed(s);
+        }
+
+    }
+
+    private void processSeed(Seed s) {
+        boolean changed = false;
+        for (Mapping m : seed2soil) {
+            if (m.contains(s.id)) {
+                s.soil = m.outputFor(s.id);
+                changed = true;
+                break;
+            }
+        }
+        if(!changed){
+            s.soil = s.id;
+        }
+        changed = false;
+        for (Mapping m : soil2fert) {
+            if (m.contains(s.soil)) {
+                s.fertilizer = m.outputFor(s.soil);
+                changed = true;
+                break;
+            }
+        }
+        if(!changed){
+            s.fertilizer = s.soil;
+        }
+        changed = false;
+        for (Mapping m : fert2water) {
+            if (m.contains(s.fertilizer)) {
+                s.water = m.outputFor(s.fertilizer);
+                changed = true;
+                break;
+            }
+        }
+        if(!changed){
+            s.water = s.fertilizer;
+        }
+        changed = false;
+        for (Mapping m : water2light) {
+            if (m.contains(s.water)) {
+                s.light = m.outputFor(s.water);
+                changed = true;
+                break;
+            }
+        }
+        if(!changed){
+            s.light = s.water;
+        }
+        changed = false;
+        for (Mapping m : light2temp) {
+            if (m.contains(s.light)) {
+                s.temperature = m.outputFor(s.light);
+                changed = true;
+                break;
+            }
+        }
+        if(!changed){
+            s.temperature = s.light;
+        }
+        changed = false;
+        for (Mapping m : temp2hum) {
+            if (m.contains(s.temperature)) {
+                s.humidity = m.outputFor(s.temperature);
+                changed = true;
+                break;
+            }
+        }
+        if(!changed){
+            s.humidity = s.temperature;
+        }
+        changed = false;
+        for (Mapping m : hum2location) {
+            if (m.contains(s.humidity)) {
+                s.location = m.outputFor(s.humidity);
+                changed = true;
+                break;
+            }
+        }
+        if(!changed){
+            s.location = s.humidity;
+        }
     }
 
 
@@ -117,9 +140,11 @@ public class Field {
                 if (line.equals("")) continue;
                 else if (line.startsWith("seeds:")) {
                     String[] inputline = line.split(" ");
-                    for (int i = 1; i < inputline.length; i++) {
-
+                    for (int i = 1; i < inputline.length; i+=2) {
                         seeds.add(new Seed(inputline[i]));
+                        if(i%2==1){
+                               seedGroups.add(new SeedGroup(inputline[i],inputline[i+1]));
+                        }
                     }
                 } else if (line.startsWith("seed-to-soil")) {
                     line = scanner.nextLine();
