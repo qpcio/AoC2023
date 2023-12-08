@@ -15,13 +15,24 @@ public class Game {
             Scanner scanner = new Scanner(input);
             while (scanner.hasNextLine()) {
                  handList.add(new Hand(scanner.nextLine()));
-
             }
         }catch (Exception e){
             System.out.println(e);
         }
         Collections.sort(handList);
+    }
 
+    public Game(String filePath, boolean task2){
+        try {
+            File input = new File(filePath);
+            Scanner scanner = new Scanner(input);
+            while (scanner.hasNextLine()) {
+                handList.add(new Hand(scanner.nextLine(),true));
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        Collections.sort(handList);
     }
 
 
